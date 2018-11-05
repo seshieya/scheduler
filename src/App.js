@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import './css/schedule.css'
 import MainNavbar from './components/MainNavbar';
-import ScheduleForm from './components/schedule/ScheduleForm';
+import ScheduleBase from './components/schedule/ScheduleBase';
 import { Container } from 'reactstrap';
 
 class App extends Component {
@@ -12,7 +12,7 @@ class App extends Component {
                 <header className="App-header">
                     <MainNavbar/>
                     <Container>
-                        <ScheduleForm/>
+                        <ScheduleBase />
                     </Container>
                 </header>
             </div>
