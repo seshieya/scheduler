@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import ScheduleForm from './ScheduleForm';
 import ScheduleFormRow from './ScheduleFormRow';
 

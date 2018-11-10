@@ -14,7 +14,7 @@ function ScheduleForm(props) {
     return (
         <div>
             <h1>Create Schedule</h1>
-            <Form action="#" method="post" id="sc-form">
+            <Form action="#" method="get" id="sc-form">
                 <Row form>
                     <Col sm="12" md="6">
                         <FormGroup>

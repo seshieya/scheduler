@@ -4,6 +4,7 @@ import './css/schedule.css'
 import MainNavbar from './components/MainNavbar';
 import ScheduleBase from './components/schedule/ScheduleBase';
 import { Container } from 'reactstrap';
+import MainContainer from "./components/MainContainer";
 
 class App extends Component {
     render() {
@@ -11,9 +12,7 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <MainNavbar/>
-                    <Container>
-                        <ScheduleBase />
-                    </Container>
+                    <MainContainer/>
                 </header>
             </div>
         );

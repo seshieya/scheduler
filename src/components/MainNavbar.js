@@ -30,10 +30,10 @@ class MainNavbar extends Component {
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="mr-auto" navbar>
                             <NavItem>
-                                <NavLink href="#" active>Create</NavLink>
+                                <NavLink href="/" active>Create</NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href="#">Preview</NavLink>
+                                <NavLink href="/preview">Preview</NavLink>
                             </NavItem>
                         </Nav>
                     </Collapse>
