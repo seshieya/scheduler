@@ -1,7 +1,24 @@
 import React, { Component } from 'react';
-import { Table, Input } from 'reactstrap';
+import {
+    Table,
+    Input,
+    Button } from 'reactstrap';
+import { incrementRowNumber, decrementRowNumber } from '../../redux/actions/SchedulerActions';
+import { connect } from 'react-redux';
 
-const row = (
+const mapStateToProps = (state) => {
+    return {
+        numberOfRows: state.numberOfRows
+    };
+};
+
+const mapDispatchToProps = {
+    incrementRowNumber,
+    decrementRowNumber
+};
+
+
+const ScheduleInfoRow = () => (
     <tr>
         <td>
             <Input type="text" />
@@ -27,12 +44,80 @@ const row = (
     </tr>
 );
 
+
+// function ScheduleInfoRow() {
+//     return (<tr>
+//         <td>
+//             <Input type="text" />
+//         </td>
+//         <td>
+//             <Input type="text" />
+//         </td>
+//         <td>
+//             <Input type="text" />
+//         </td>
+//         <td>
+//             <Input type="text" />
+//         </td>
+//         <td>
+//             <Input type="text" />
+//         </td>
+//         <td>
+//             <Input type="text" />
+//         </td>
+//         <td>
+//             <Input type="textarea" />
+//         </td>
+//     </tr>);
+// }
+
 class Draft extends Component {
     constructor(props) {
 
         super(props);
 
-        this.state = {}
+        this.firstRow = 1;
+
+        this.state = {
+            rows: Draft.generateRows(this.props.numberOfRows)
+        };
+
+        this.appendRow = this.appendRow.bind(this);
+        this.removeRow = this.removeRow.bind(this);
+
+    }
+
+    static generateRows(numberOfRows) {
+        let rows = [];
+
+        for(let i = 1; i <= numberOfRows; i++) {
+            rows = rows.concat(<ScheduleInfoRow key={i} />);
+        }
+
+        return rows;
+    }
+
+    // todo: refactor into the reducer if there's value? because this is also used in SchedulerBase
+    async appendRow() {
+        await this.props.incrementRowNumber(this.props.numberOfRows);
+
+        this.setState((state) => {
+            return { rows: state.rows.concat(<ScheduleInfoRow key={this.props.numberOfRows}/>) };
+        });
+    }
+
+    // todo: refactor into the reducer if there's value? because this is also used in SchedulerBase
+    removeRow() {
+        const currentRowNumber = this.props.numberOfRows;
+        const existingRows = this.state.rows;
+
+        if (currentRowNumber !== this.firstRow) {
+            this.props.decrementRowNumber(this.props.numberofRows);
+
+            this.setState((state) => {
+                return { rows: state.rows.slice(0, state.rows.length - 1)}
+            });
+        }
     }
 
 
@@ -102,12 +187,15 @@ class Draft extends Component {
                     </tr>
                     </thead>
                     <tbody>
+                    { this.state.rows }
                     </tbody>
                 </Table>
+
+                <Button outline color="primary" onClick={this.appendRow}>+ Add</Button>
+                <Button outline color="primary" onClick={this.removeRow}>- Remove</Button>
             </div>
         );
     }
-
 }
 
-export default Draft;
+export default connect(mapStateToProps, mapDispatchToProps)(Draft);

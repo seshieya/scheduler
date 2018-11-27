@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import ScheduleForm from './ScheduleForm';
 import ScheduleFormRow from './ScheduleFormRow';
+import PropTypes from 'prop-types';
 
-const initialRow = 1;
 
 class ScheduleBase extends Component {
     constructor(props) {
         super(props);
 
+        this.initialRow = 1;
+
         this.state = {
-            rowNumber: initialRow,
-            rows: [<ScheduleFormRow key={initialRow} rowNumber={initialRow} />]
+            rows: [<ScheduleFormRow key={this.initialRow} rowNumber={this.initialRow} />]
         };
 
         this.onAppendRow = this.onAppendRow.bind(this);
@@ -18,23 +19,27 @@ class ScheduleBase extends Component {
 
     }
 
-    onAppendRow() {
-        const newRowNumber = this.state.rowNumber + 1;
+    // increment the store row numbers and concat a new ScheduleFormRow to the rows state
+    async onAppendRow() {
 
-        this.setState({
-            rowNumber: newRowNumber,
-            rows: this.state.rows.concat(<ScheduleFormRow key={newRowNumber} rowNumber={newRowNumber} />)
+        await this.props.incrementRowNumber(this.props.numberOfRows);
+
+        this.setState((state) => {
+            return { rows: state.rows.concat(<ScheduleFormRow key={this.props.numberOfRows} rowNumber={this.props.numberOfRows}/>) };
         });
     }
 
+    // decrement the store row numbers and removee the latest row from the rows state
     onRemoveRow() {
-        const currentRowNumber = this.state.rowNumber;
+        const currentRowNumber = this.props.numberOfRows;
         const existingRows = this.state.rows;
 
-        if (currentRowNumber !== initialRow) {
-            this.setState({
-                rowNumber: currentRowNumber - 1,
-                rows: existingRows.slice(0, existingRows.length - 1)
+        if (currentRowNumber !== this.initialRow) {
+
+            this.props.decrementRowNumber(this.props.numberOfRows);
+
+            this.setState((state) => {
+                return { rows: existingRows.slice(0, existingRows.length - 1) };
             });
         }
     }
@@ -45,5 +50,10 @@ class ScheduleBase extends Component {
         );
     }
 }
+
+// ScheduleBase.propTypes = {
+//     incrementRowNumber: PropTypes.func.isRequired,
+//     decrementRowNumber: PropTypes.func.isRequired
+// };
 
 export default ScheduleBase;

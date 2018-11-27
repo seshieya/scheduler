@@ -2,13 +2,12 @@ import React, {Component} from 'react';
 import {
     Container,
     Navbar,
-    NavbarBrand,
     NavbarToggler,
     Collapse,
     Nav,
-    NavItem,
-    NavLink
+    NavItem
 } from 'reactstrap';
+import { NavLink } from 'react-router-dom';
 
 class MainNavbar extends Component {
     constructor(props) {
@@ -25,15 +24,28 @@ class MainNavbar extends Component {
         return (
             <Navbar color="dark" dark expand="md">
                 <Container>
-                    <NavbarBrand href="/">Scheduler</NavbarBrand>
+                    <NavItem>
+                        <NavLink exact
+                                 to="/"
+                                 className="navbar-brand float-left">Scheduler</NavLink>
+                    </NavItem>
                     <NavbarToggler onClick={this.toggle}/>
                     <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="mr-auto" navbar>
                             <NavItem>
-                                <NavLink href="/" active>Create</NavLink>
+                                <NavLink exact
+                                    to="/"
+                                    className="nav-link">Create</NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href="/preview">Preview</NavLink>
+                                <NavLink
+                                    to="/preview"
+                                    className="nav-link">Preview</NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink
+                                    to="/draft"
+                                    className="nav-link">Draft</NavLink>
                             </NavItem>
                         </Nav>
                     </Collapse>
