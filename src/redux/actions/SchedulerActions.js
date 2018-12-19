@@ -4,7 +4,11 @@
 
 import {
     INCREMENT_ROW_NUMBER,
-    DECREMENT_ROW_NUMBER} from './ActionTypes';
+    DECREMENT_ROW_NUMBER,
+    UPDATE_COORDINATOR,
+    UPDATE_JOB,
+    UPDATE_SCHEDULE
+} from './ActionTypes';
 
 /**
  * increment the number of rows
@@ -24,6 +28,21 @@ export const incrementRowNumber = (numberOfRows) => ({
 export const decrementRowNumber = (numberOfRows) => ({
     type: DECREMENT_ROW_NUMBER,
     numOfRows: numberOfRows
+});
+
+export const updateCoordinator = (coordinatorInfo) => ({
+    type: UPDATE_COORDINATOR,
+    coordinatorInfo: coordinatorInfo
+});
+
+export const updateJob = (jobInfo) => ({
+    type: UPDATE_JOB,
+    jobInfo: jobInfo
+});
+
+export const updateSchedule = (scheduleInfo) => ({
+    type: UPDATE_SCHEDULE,
+    scheduleInfo: scheduleInfo
 });
 
 

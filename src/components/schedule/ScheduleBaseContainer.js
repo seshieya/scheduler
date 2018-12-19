@@ -1,17 +1,29 @@
 import {connect} from 'react-redux';
 import ScheduleBase from './ScheduleBase';
-import { incrementRowNumber, decrementRowNumber } from '../../redux/actions/SchedulerActions';
-
+import {
+    incrementRowNumber,
+    decrementRowNumber,
+    updateCoordinator,
+    updateJob,
+    updateSchedule
+} from '../../redux/actions/SchedulerActions';
 
 const mapStateToProps = (state) => {
     return {
-        numberOfRows: state.numberOfRows
+        numberOfRows: state.numberOfRows,
+        scheduleInfo: state.scheduleInfo,
+        jobInfo: state.jobInfo,
+        coordinatorInfo: state.coordinatorInfo
     };
 };
 
+// todo: find out if there is a way not to repeat the importing and mapping of these constants
 const mapDispatchToProps = {
     incrementRowNumber,
     decrementRowNumber,
+    updateCoordinator,
+    updateJob,
+    updateSchedule
 };
 
 const ScheduleBaseContainer = connect(
