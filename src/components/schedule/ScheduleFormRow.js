@@ -43,11 +43,11 @@ function ScheduleFormRow(props) {
                 </Col>
                 <Col>
                     <FormGroup>
-                        <Label htmlFor={ "sc-row" + props.rowNumber + "-trade-email" }>Trade Email:</Label>
+                        <Label htmlFor={ "sc-row" + props.rowNumber + "-tradeEmail" }>Trade Email:</Label>
                         <Input type="text"
-                               name={ "sc-row" + props.rowNumber + "-trade-email" }
-                               id={ "sc-row" + props.rowNumber + "-trade-email" }
-                               className={ "sc-rows-trade-email sc-rows-" + props.rowNumber }/>
+                               name={ "sc-row" + props.rowNumber + "-tradeEmail" }
+                               id={ "sc-row" + props.rowNumber + "-tradeEmail" }
+                               className={ "sc-rows-tradeEmail sc-rows-" + props.rowNumber }/>
                     </FormGroup>
                 </Col>
             </Row>

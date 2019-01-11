@@ -1,53 +1,7 @@
 import React, { Component } from 'react';
-import {
-    Table,
-    Input,
-    Button
-} from 'reactstrap';
-import { incrementRowNumber, decrementRowNumber } from '../../redux/actions/SchedulerActions';
-import { connect } from 'react-redux';
+import { Button, Input, Table } from 'reactstrap';
 import ScheduleInfoRow from './ScheduleInfoRow';
-
-const mapStateToProps = (state) => {
-    return {
-        numberOfRows: state.numberOfRows,
-        coordinatorInfo: state.coordinatorInfo,
-        jobInfo: state.jobInfo,
-        scheduleInfo: state.scheduleInfo
-    };
-};
-
-const mapDispatchToProps = {
-    incrementRowNumber,
-    decrementRowNumber
-};
-
-// const ScheduleInfo = () =>(
-//         <tr>
-//             <td>
-//                 <Input type="text"/>
-//             </td>
-//             <td>
-//                 <Input type="text"/>
-//             </td>
-//             <td>
-//                 <Input type="text"/>
-//             </td>
-//             <td>
-//                 <Input type="text"/>
-//             </td>
-//             <td>
-//                 <Input type="text"/>
-//             </td>
-//             <td>
-//                 <Input type="text"/>
-//             </td>
-//             <td>
-//                 <Input type="textarea"/>
-//             </td>
-//         </tr>
-//     );
-
+import PropTypes from 'prop-types';
 
 class Draft extends Component {
     constructor(props) {
@@ -57,15 +11,16 @@ class Draft extends Component {
         this.firstRow = 1;
 
         this.state = {
-            rows: Draft.generateRows(this.props.scheduleInfo['rowData'])
+            rowNumber: this.props.scheduleInfoRows.length,
+            rows: Draft.generateRowsView(this.props.scheduleInfoRows)
         };
 
         this.appendRow = this.appendRow.bind(this);
         this.removeRow = this.removeRow.bind(this);
-
+        this.collectDataAndSaveToStore = this.collectDataAndSaveToStore.bind(this);
     }
 
-    static generateRows(scheduleRowDataArray) {
+    static generateRowsView(scheduleRowDataArray) {
         let rows = [];
 
         // for (let key in scheduleRowData) {
@@ -73,54 +28,126 @@ class Draft extends Component {
         //     if(!scheduleRowData.hasOwnProperty(key)) {
         //         continue;
         //     }
-        //     rows = rows.concat(this.generatePopulatedRow(...scheduleRowData));
+        //     rows = rows.concat(this.populateRow(...scheduleRowData));
         // }
 
         // todo: remove this undefined check once Draft page is not directly accessible unless store data has been submitted
-        if (scheduleRowDataArray !== undefined) {
+        if (typeof scheduleRowDataArray !== 'undefined') {
+
             scheduleRowDataArray.forEach((rowDataObject, index) => {
+                //let rowKeysArray = Object.keys(rowDataObject);
                 let rowValuesArray = Object.values(rowDataObject);
-                rows = rows.concat(this.generatePopulatedRow(index, ...rowValuesArray));
+
+                // get array of the keys of a row object, then
+                // let rowArray = Object.keys(rowDataObject).map(key => [key, rowDataObject[key]]);
+
+                // maps each property-value pair as [key, value] array,
+                // and returns all of these [key,value] arrays in a single array
+                //let rowArray = Object.entries(rowDataObject);
+                //console.log(rowArray);
+
+                // increment the index by 1 to get the correct rowNumber
+                // todo: think of a better way to incorporate the row number?
+                let rowNumber = index + 1;
+                rows = rows.concat(this.populateRow(rowNumber, ...rowValuesArray));
             });
         }
         return rows;
     }
 
-    static generatePopulatedRow(index, typeOfWork, daysNeeded, trade, tradeEmail, comments) {
+    static populateRow(rowNumber, typeOfWork, daysNeeded, trade, tradeEmail, comments) {
         return (
-            <ScheduleInfoRow key={ index }
+            <ScheduleInfoRow key={ rowNumber }
                              typeOfWork={ typeOfWork }
                              daysNeeded={ daysNeeded }
                              trade={ trade }
                              tradeEmail={ tradeEmail }
                              comments={ comments }
-            />);
+                             rowNumber={ rowNumber } />);
     }
 
-    // todo: refactor into the reducer if there's value? because this is also used in SchedulerBase
+    // todo: move to reducer?? this function is slightly different because there is no start date...
+    collectDataAndSaveToStore() {
+        let coordInputs = document.getElementsByClassName("coordinatorData");
+        let jobInputs = document.getElementsByClassName("jobData");
+
+        let scheduleData = {};
+        let coordData = {};
+        let jobData = {};
+
+        scheduleData['rowData'] = [];
+        for (let rowNumber = 1; rowNumber <= this.state.rowNumber; rowNumber++) {
+            // todo: change all strings to use template literals
+            let inputs = document.getElementsByClassName(`sc-rows-${rowNumber}`);
+
+            console.log(inputs);
+
+            let elements = {};
+            for (let element of inputs) {
+                elements[element.id] = element.value;
+            }
+            // push the newly created elements object into scheduleData array
+            scheduleData['rowData'].push(elements);
+        }
+
+        for (let i = 0; i < coordInputs.length; i++) {
+            coordData[coordInputs[i].id] = coordInputs[i].value;
+        }
+
+        for (let i = 0; i < jobInputs.length; i++) {
+            jobData[jobInputs[i].id] = jobInputs[i].value;
+        }
+
+        console.log("scheduleData", scheduleData);
+        console.log("coordData", coordData);
+        console.log("jobData", jobData);
+
+        // pass data back to parent component by calling the prop functions passed down from the parent
+        this.props.updateCoordinator(coordData);
+        this.props.updateJob(jobData);
+        this.props.updateSchedule(scheduleData);
+        this.props.updateNumberOfRows();
+
+        //TODO: also need to update the start date in the store. NEED TO HAVE THE VALUES REPOPULATE ON THE CREATION PAGE, PLUS NEED TO MAKE DATE GENERATION FUNCTION
+    }
+
+    // todo: refactor into the reducer if there's value? because this is also used in SchedulerBase, but they return different states
     async appendRow() {
-        await this.props.incrementRowNumber(this.props.numberOfRows);
+        //await this.props.incrementRowNumber(this.props.numberOfRows);
+
+        this.setState(state => {
+            return {
+                rowNumber: state.rowNumber + 1
+            }
+        });
 
         this.setState((state) => {
-            return { rows: state.rows.concat(<ScheduleInfoRow key={ this.props.numberOfRows }/>) };
+            return {
+                rows: state.rows.concat(<ScheduleInfoRow key={ state.rowNumber }
+                                                         rowNumber={ state.rowNumber }/>)
+            };
         });
     }
 
-    // todo: refactor into the reducer if there's value? because this is also used in SchedulerBase
+    // todo: refactor into the reducer if there's value? because this is also used in SchedulerBase, but they return different states
     removeRow() {
-        const currentRowNumber = this.props.numberOfRows;
+        if (this.state.rowNumber !== this.firstRow) {
+            //this.props.decrementRowNumber(this.props.numberofRows);
 
-        if (currentRowNumber !== this.firstRow) {
-            this.props.decrementRowNumber(this.props.numberofRows);
-
-            this.setState((existingState) => {
-                return { rows: existingState.rows.slice(0, existingState.rows.length - 1) }
+            this.setState(existingState => {
+                return {
+                    rowNumber: existingState.rowNumber - 1,
+                    rows: existingState.rows.slice(0, existingState.rows.length - 1)
+                };
             });
         }
     }
 
-    render() {
+    save(action) {
 
+    }
+
+    render() {
         return (
             <div>
                 <h1>Draft</h1>
@@ -137,15 +164,21 @@ class Draft extends Component {
                     <tr>
                         <td>
                             <Input type="text"
-                                   defaultValue={ this.props.coordinatorInfo['sc-coordinator'] }/>
+                                   defaultValue={ this.props.coordinatorInfo['sc-coordinator'] }
+                                   id="sc-coordinator"
+                                   className="coordinatorData"/>
                         </td>
                         <td>
                             <Input type="text"
-                                   defaultValue={ this.props.coordinatorInfo['sc-coord-phone'] }/>
+                                   defaultValue={ this.props.coordinatorInfo['sc-coord-phone'] }
+                                   id="sc-coord-phone"
+                                   className="coordinatorData"/>
                         </td>
                         <td>
                             <Input type="text"
-                                   defaultValue={ this.props.coordinatorInfo['sc-coord-email'] }/>
+                                   defaultValue={ this.props.coordinatorInfo['sc-coord-email'] }
+                                   id="sc-coord-email"
+                                   className="coordinatorData"/>
                         </td>
                     </tr>
                     </tbody>
@@ -164,20 +197,24 @@ class Draft extends Component {
                     <tr>
                         <td>
                             <Input type="text"
-                                   defaultValue={ this.props.jobInfo['sc-job-number'] }/>
+                                   defaultValue={ this.props.jobInfo['sc-job-number'] }
+                                   id="sc-job-number"
+                                   className="jobData"/>
                         </td>
                         <td>
                             <Input type="text"
-                                   defaultValue={ this.props.jobInfo['sc-job-address'] }/>
+                                   defaultValue={ this.props.jobInfo['sc-job-address'] }
+                                   id="sc-job-address"
+                                   className="jobData"/>
                         </td>
                         <td>
                             <Input type="text"
-                                   defaultValue={ this.props.jobInfo['sc-job-access'] }/>
-
+                                   defaultValue={ this.props.jobInfo['sc-job-access'] }
+                                   id="sc-job-access"
+                                   className="jobData"/>
                         </td>
                     </tr>
                     </tbody>
-
 
                 </Table>
                 <Table bordered>
@@ -199,9 +236,23 @@ class Draft extends Component {
 
                 <Button outline color="primary" onClick={ this.appendRow }>+ Add</Button>
                 <Button outline color="primary" onClick={ this.removeRow }>- Remove</Button>
+
+                <hr/>
+
+                <Button color="primary" onClick={ this.back }>Back</Button>
+                <Button color="primary" onClick={ this.collectDataAndSaveToStore }>Submit</Button>
             </div>
         );
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Draft);
+Draft.propTypes = {
+    numberOfRows: PropTypes.number,
+    coordinatorInfo: PropTypes.object,
+    jobInfo: PropTypes.object,
+    scheduleInfoRows: PropTypes.array
+    // todo: need to add proptype to scheduleStartDate
+};
+
+export default Draft;
+

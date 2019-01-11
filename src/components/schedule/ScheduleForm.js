@@ -9,6 +9,11 @@ import {
     Label,
     Button
 } from 'reactstrap';
+import 'react-dates/initialize';
+import 'react-dates/lib/css/_datepicker.css';
+import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'react-dates';
+
+
 
 class ScheduleForm extends Component {
     constructor(props) {
@@ -16,10 +21,11 @@ class ScheduleForm extends Component {
 
         this.collectDataAndSaveToStore = this.collectDataAndSaveToStore.bind(this);
 
-        //this.state = { coordData: {}, jobData: {}, scheduleData: {} };
+        // schedule start date using the date picker:
+        this.state = { date: null };
     }
 
-    async collectDataAndSaveToStore() {
+    collectDataAndSaveToStore() {
         let coordInputs = document.getElementsByClassName("coordinatorData");
         let jobInputs = document.getElementsByClassName("jobData");
 
@@ -29,13 +35,16 @@ class ScheduleForm extends Component {
 
         scheduleData['rowData'] = [];
         for (let rowNumber = 1; rowNumber <= this.props.numberOfRows; rowNumber++) {
-            let inputs = document.getElementsByClassName("sc-rows-" + rowNumber);
+            // todo: change all strings to use template literals
+            let inputs = document.getElementsByClassName(`sc-rows-${rowNumber}`);
+
+            console.log(inputs);
 
             let elements = {};
             for (let element of inputs) {
                 elements[element.id] = element.value;
             }
-            // push the elements object into scheduleData array
+            // push the newly created elements object into scheduleData array
             scheduleData['rowData'].push(elements);
         }
 
@@ -54,15 +63,11 @@ class ScheduleForm extends Component {
         console.log("coordData", coordData);
         console.log("jobData", jobData);
 
-
-        // this.setState((state) => {
-        //     return { coordData: coordData, jobData: jobData, scheduleData: scheduleData };
-        // });
-
         // pass data back to parent component by calling the prop functions passed down from the parent
         this.props.collectCoordinatorInfo(coordData);
         this.props.collectJobInfo(jobData);
         this.props.collectScheduleInfo(scheduleData);
+        this.props.updateNumberOfRowsInStore();
     }
 
     render() {
@@ -145,10 +150,17 @@ class ScheduleForm extends Component {
                         <Col xs="12" md="3">
                             <FormGroup>
                                 <Label htmlFor="sc-startdate">Schedule Start Date:</Label>
-                                <Input type="text"
-                                       name="sc-startdate"
-                                       id="sc-startdate"
-                                       placeholder=""/>
+                                {/*<Input type="text"*/}
+                                       {/*name="sc-startdate"*/}
+                                       {/*id="sc-startdate"*/}
+                                       {/*placeholder=""/>*/}
+                                <SingleDatePicker
+                                    date={this.state.date} // momentPropTypes.momentObj or null
+                                    onDateChange={date => this.setState({ date })} // PropTypes.func.isRequired
+                                    focused={this.state.focused} // PropTypes.bool
+                                    onFocusChange={({ focused }) => this.setState({ focused })} // PropTypes.func.isRequired
+                                    id="sc-startdate" // PropTypes.string.isRequired,
+                                />
                             </FormGroup>
                         </Col>
                     </Row>

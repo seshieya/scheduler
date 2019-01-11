@@ -5,7 +5,8 @@ import {
     decrementRowNumber,
     updateCoordinator,
     updateJob,
-    updateSchedule
+    updateSchedule,
+    updateNumberOfRows
 } from '../../redux/actions/SchedulerActions';
 
 const mapStateToProps = (state) => {
@@ -13,17 +14,19 @@ const mapStateToProps = (state) => {
         numberOfRows: state.numberOfRows,
         scheduleInfo: state.scheduleInfo,
         jobInfo: state.jobInfo,
-        coordinatorInfo: state.coordinatorInfo
+        coordinatorInfo: state.coordinatorInfo,
     };
 };
 
 // todo: find out if there is a way not to repeat the importing and mapping of these constants
 const mapDispatchToProps = {
-    incrementRowNumber,
-    decrementRowNumber,
+    //todo: remove incrementRowNumber and DecrementRowNumber
+    // incrementRowNumber,
+    // decrementRowNumber,
     updateCoordinator,
     updateJob,
-    updateSchedule
+    updateSchedule,
+    updateNumberOfRows
 };
 
 const ScheduleBaseContainer = connect(

@@ -7,7 +7,8 @@ import {
     DECREMENT_ROW_NUMBER,
     UPDATE_COORDINATOR,
     UPDATE_JOB,
-    UPDATE_SCHEDULE
+    UPDATE_SCHEDULE,
+    UPDATE_NUMBER_OF_ROWS
 } from '../actions/ActionTypes';
 
 /**
@@ -18,7 +19,10 @@ const INITIAL_STATE = {
     numberOfRows: 1,
     coordinatorInfo: {},
     jobInfo: {},
-    scheduleInfo: {}
+    scheduleInfo: {
+        rowData: [],
+        startDate: ""
+    }
 };
 
 
@@ -34,6 +38,8 @@ function scheduler(state = INITIAL_STATE, action) {
             return Object.assign({}, state, { numberOfRows: action.numOfRows + 1 });
         case DECREMENT_ROW_NUMBER:
             return Object.assign({}, state, { numberOfRows: action.numOfRows - 1 });
+        case UPDATE_NUMBER_OF_ROWS:
+            return Object.assign({}, state, { numberOfRows: state.scheduleInfo.rowData.length });
         case UPDATE_COORDINATOR:
             return Object.assign({}, state, { coordinatorInfo: action.coordinatorInfo });
         case UPDATE_JOB:
