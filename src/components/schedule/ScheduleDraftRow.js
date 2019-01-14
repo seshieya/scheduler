@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from 'reactstrap';
 
-function ScheduleInfoRow(props) {
+function ScheduleDraftRow(props) {
     return (
         <tr>
             <td>
@@ -60,4 +60,4 @@ function ScheduleInfoRow(props) {
     );
 }
 
-export default ScheduleInfoRow;
+export default ScheduleDraftRow;

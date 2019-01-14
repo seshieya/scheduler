@@ -11,9 +11,7 @@ import {
 } from 'reactstrap';
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
-import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'react-dates';
-
-
+import { SingleDatePicker } from 'react-dates';
 
 class ScheduleForm extends Component {
     constructor(props) {
@@ -22,7 +20,7 @@ class ScheduleForm extends Component {
         this.collectDataAndSaveToStore = this.collectDataAndSaveToStore.bind(this);
 
         // schedule start date using the date picker:
-        this.state = { date: null };
+        this.state = { date: null, focused: false };
     }
 
     collectDataAndSaveToStore() {
@@ -44,7 +42,7 @@ class ScheduleForm extends Component {
             for (let element of inputs) {
                 elements[element.id] = element.value;
             }
-            // push the newly created elements object into scheduleData array
+            // push the newly created elements object into scheduleData array, so rowData now contains an array of objects
             scheduleData['rowData'].push(elements);
         }
 
@@ -159,6 +157,12 @@ class ScheduleForm extends Component {
                                     onDateChange={date => this.setState({ date })} // PropTypes.func.isRequired
                                     focused={this.state.focused} // PropTypes.bool
                                     onFocusChange={({ focused }) => this.setState({ focused })} // PropTypes.func.isRequired
+                                    numberOfMonths={ 1 }
+                                    readOnly={ true }
+                                    showDefaultInputIcon={ true }
+                                    isOutsideRange = {() => false}
+                                    small = { true }
+                                    displayFormat="YYYY-MM-DD"
                                     id="sc-startdate" // PropTypes.string.isRequired,
                                 />
                             </FormGroup>

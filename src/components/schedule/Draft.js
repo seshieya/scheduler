@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { Button, Input, Table } from 'reactstrap';
-import ScheduleInfoRow from './ScheduleInfoRow';
+import ScheduleDraftRow from './ScheduleDraftRow';
 import PropTypes from 'prop-types';
+import moment from 'moment';
+
 
 class Draft extends Component {
     constructor(props) {
@@ -11,8 +13,9 @@ class Draft extends Component {
         this.firstRow = 1;
 
         this.state = {
-            rowNumber: this.props.scheduleInfoRows.length,
-            rows: Draft.generateRowsView(this.props.scheduleInfoRows)
+            rowNumber: this.props.scheduleDraftRows.length,
+            rows: Draft.generateRowsView(this.props.scheduleDraftRows),
+            startDate: Draft.generateDatesFromStartDate(props.scheduleStartDate, props.scheduleDraftRows)
         };
 
         this.appendRow = this.appendRow.bind(this);
@@ -46,10 +49,10 @@ class Draft extends Component {
                 //let rowArray = Object.entries(rowDataObject);
                 //console.log(rowArray);
 
-                // increment the index by 1 to get the correct rowNumber
+                // increment the index by 1 to get the correct rowNumber for the key
                 // todo: think of a better way to incorporate the row number?
                 let rowNumber = index + 1;
-                rows = rows.concat(this.populateRow(rowNumber, ...rowValuesArray));
+                rows = rows.concat(Draft.populateRow(rowNumber, ...rowValuesArray));
             });
         }
         return rows;
@@ -57,13 +60,131 @@ class Draft extends Component {
 
     static populateRow(rowNumber, typeOfWork, daysNeeded, trade, tradeEmail, comments) {
         return (
-            <ScheduleInfoRow key={ rowNumber }
-                             typeOfWork={ typeOfWork }
-                             daysNeeded={ daysNeeded }
-                             trade={ trade }
-                             tradeEmail={ tradeEmail }
-                             comments={ comments }
-                             rowNumber={ rowNumber } />);
+            <ScheduleDraftRow key={ rowNumber }
+                              typeOfWork={ typeOfWork }
+                              daysNeeded={ daysNeeded }
+                              trade={ trade }
+                              tradeEmail={ tradeEmail }
+                              comments={ comments }
+                              rowNumber={ rowNumber }/>);
+    }
+
+    // parse a date in yyyy-mm-dd format
+    // static parseDate(startDate) {
+    //     let parts = startDate.split('-');
+    //     // constructor: Date(year, month [, day [, hours[, minutes[, seconds[, ms]]]]])
+    //     // months are 0-based so need to subtract 1
+    //     return new Date(parts[0], parts[1] - 1, parts[2])
+    // }
+
+    //ISO 8601:  YYYY-MM-DDTHH:mm:ss.sssZ
+    //NOTE: choosing to do this in native javascript over using moment as can extract to independent library in the future
+    // static generateDatesFromStartDateNative(startDate, scheduleRows) {
+    //     let nativeDate = new Date(Draft.parseDate(startDate));
+    //     console.log('nativeDate', nativeDate);
+    //
+    //     scheduleRows.forEach((row, index) => {
+    //         let rowNumber = index + 1;
+    //
+    //         let dayOfWeek = nativeDate.getDay();
+    //         let numberOfMillisecondsToIncrement = Draft.skipWeekendsNative(dayOfWeek, true);
+    //         let newDate = new Date(nativeDate.getTime() + numberOfMillisecondsToIncrement);
+    //
+    //         let dateOptions = { weekday: 'short', month: 'short', day: 'numeric'};
+    //         row.dayIn = newDate.toLocaleDateString('en-US', dateOptions);
+    //
+    //         console.log('dayIn', row.dayIn);
+    //
+    //     });
+    // }
+
+    ///ISO 8601:  YYYY-MM-DDTHH:mm:ss.sssZ
+    static generateDatesFromStartDate(startDate, scheduleRows, shouldSkipWeekends = false) {
+        const formatDate = 'ddd MMM D';
+
+        // parse date in local time
+        let date = moment('2019-01-11', 'YYYY-MM-DD');
+
+        let dayInDayOut = [];
+        let rowNumber = null;
+
+        scheduleRows.forEach((row, index) => {
+            rowNumber = index + 1;
+
+            row.dayIn = date.format(formatDate);
+
+            // deducting 1 day to match up with business logic:
+            // 1 business day needed means dayIn and dayOut will be the same day
+            // 2 business days means workers are working for two days (eg. if dayIn is Monday then dayOut is Tuesday)
+            let businessDaysNeeded = row[`sc-row${rowNumber}-days`] - 1;
+
+            console.log('row[`sc-row${rowNumber}-days`]', row[`sc-row${rowNumber}-days`]);
+
+            if (shouldSkipWeekends) {
+                //date.add(businessDaysNeeded, 'days');
+                date = Draft.skipWeekends(date, businessDaysNeeded)
+                row.dayOut = date.format(formatDate);
+            }
+            else {
+                date.add(businessDaysNeeded, 'days');
+                row.dayOut = date.format(formatDate)
+            }
+
+            dayInDayOut.push(row);
+
+            // increment to the next date
+            if (shouldSkipWeekends) {
+                date = Draft.skipWeekends(date, 1);
+            }
+            else {
+                date.add(1, 'days');
+            }
+
+            console.log('date at the end of function', date.format(formatDate));
+
+            console.log('dayInDayOut', dayInDayOut);
+        });
+    }
+
+    /**
+     * Adds additional days in order to skip the weekends
+     * @param {moment} date
+     * @param {number} daysToAdd The number of days needed to add to the date
+     * @returns {moment} The moment date after skipping weekends
+     */
+    static skipWeekends(date, daysToAdd) {
+        let daysToIncrement = 0;
+        for(let i = 0; i < daysToAdd; i++) {
+            date.add(1, 'days');
+
+            // if date lands on a weekend, get the number of days to skip weekend:
+            daysToIncrement = this.getDaysToIncrement(date.day());
+            date.add(daysToIncrement, 'days');
+        }
+        return date;
+    }
+
+    /**
+     * Checks to see if the day of the week is Saturday or Sunday. If it is, it will return the number of days to increment in order to make the day Monday
+     * @param {number} dayNumber The day of the week as a number (0 is Sunday, 6 is Saturday)
+     * @param {boolean} shouldSkipWeekends
+     * @returns {number} The number of days to increment
+     */
+    static getDaysToIncrement(dayNumber) {
+        // if (!shouldSkipWeekends) {
+        //     return 0;
+        // }
+
+        if (dayNumber === 6) { // Saturday
+            return 2; // push to Monday
+        }
+        else if (dayNumber === 0) { // Sunday
+            return 1; // push to Monday
+        }
+        else {
+            return 0; // keep the same day
+        }
+
     }
 
     // todo: move to reducer?? this function is slightly different because there is no start date...
@@ -77,7 +198,7 @@ class Draft extends Component {
 
         scheduleData['rowData'] = [];
         for (let rowNumber = 1; rowNumber <= this.state.rowNumber; rowNumber++) {
-            // todo: change all strings to use template literals
+            // todo: change all string concatenation to use template literals
             let inputs = document.getElementsByClassName(`sc-rows-${rowNumber}`);
 
             console.log(inputs);
@@ -108,6 +229,7 @@ class Draft extends Component {
         this.props.updateSchedule(scheduleData);
         this.props.updateNumberOfRows();
 
+
         //TODO: also need to update the start date in the store. NEED TO HAVE THE VALUES REPOPULATE ON THE CREATION PAGE, PLUS NEED TO MAKE DATE GENERATION FUNCTION
     }
 
@@ -123,8 +245,8 @@ class Draft extends Component {
 
         this.setState((state) => {
             return {
-                rows: state.rows.concat(<ScheduleInfoRow key={ state.rowNumber }
-                                                         rowNumber={ state.rowNumber }/>)
+                rows: state.rows.concat(<ScheduleDraftRow key={ state.rowNumber }
+                                                          rowNumber={ state.rowNumber }/>)
             };
         });
     }
@@ -141,10 +263,6 @@ class Draft extends Component {
                 };
             });
         }
-    }
-
-    save(action) {
-
     }
 
     render() {

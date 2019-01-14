@@ -11,7 +11,7 @@ const mapStateToProps = (state) => {
     return {
         coordinatorInfo: state.coordinatorInfo,
         jobInfo: state.jobInfo,
-        scheduleInfoRows: state.scheduleInfo['rowData'],
+        scheduleDraftRows: state.scheduleInfo['rowData'],
         scheduleStartDate: state.scheduleInfo['startDate']
     };
 };
